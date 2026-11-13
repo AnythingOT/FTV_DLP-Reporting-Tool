@@ -1,0 +1,11 @@
+Version
+V14.0,THIS LINE CONTAINS VERSION INFORMATION. DO NOT REMOVE!!!
+Group Name,Tag Name,Tag Type,Trigger Type,Interval Value,Interval Unit,Maximum updateRate Value,Maximum updateRate Unit,Deadband Mode,Deadband Value,HeartbeatRate Value,HeartbeatRate Unit,
+,::[DLPro]Program:MainProgram.M101_Sim.ACC,DINT,Periodic,10,Second,,,,,,
+NewGroup1,system\Hour,DINT,Periodic,10,Second,,,,,,
+NewGroup1,system\Minute,DINT,Periodic,10,Second,,,,,,
+NewGroup1,system\Second,DINT,Periodic,10,Second,,,,,,
+NewGroup2,::[DLPro]Program:MainProgram.M101_Sim2.ACC,DINT,Periodic,10,Second,,,,,,
+NewGroup2,[DLPro]M101_OnCMD,BOOL,Periodic,10,Second,,,,,,
+NewGroup2,[DLPro]M101_StartReq,BOOL,Periodic,10,Second,,,,,,
+NewGroup2,[DLPro]M101_StopReq,BOOL,Periodic,10,Second,,,,,,
