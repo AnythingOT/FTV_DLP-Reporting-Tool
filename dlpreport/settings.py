@@ -24,7 +24,7 @@ DEFAULT_GENERAL = {
 
 
 def new_profile(name="Local HMI PC", host="localhost"):
-    return {"name": name, "host": host, "port": 8086, "https": False, "verify_ssl": False,
+    return {"name": name, "host": host, "port": 8086, "https": False, "verify_ssl": True,
             "org": "Rockwell", "auth": "token", "token": "", "username": "", "password": "",
             "tz": "local", "heartbeat_tag": "", "last_tags": [], "last_bucket": "", "groups": {}}
 
