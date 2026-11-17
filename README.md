@@ -17,6 +17,15 @@ digits of REALs), timestamps with nanoseconds. No averaging, interpolation or ro
 3. **Heartbeat tag (optional)** – a PLC counter incrementing every second, logged **periodically** in
    DataLogPro. It is the only way to detect a PLC in Program mode (see section 4).
 
+### Security notes
+
+- The built-in InfluxDB of FactoryTalk View listens on plain **HTTP**. The token or password and all
+  data cross the network unencrypted, so use the tool only on the plant network (or through a VPN),
+  never across an untrusted network.
+- Always sign in with the **read-only member** account, not the admin account.
+- If you put InfluxDB behind HTTPS, tick **Use HTTPS** in the HMI PC's advanced settings. Certificate
+  checking is on by default for new HMI PCs; switch it off only for a self-signed certificate you trust.
+
 ## 2. Install and run
 
 Python 3.12 or 3.13 recommended.
