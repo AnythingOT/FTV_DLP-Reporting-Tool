@@ -1,0 +1,7 @@
+cff-version: 1.2.0
+message: "If you use FTV_DLP-Reporting-Tool, please cite it as below."
+title: "FTV_DLP-Reporting-Tool"
+authors:
+  - name: "AJ (AnythingOT)"
+repository-code: "https://github.com/AnythingOT/FTV_DLP-Reporting-Tool"
+license: GPL-3.0-only
