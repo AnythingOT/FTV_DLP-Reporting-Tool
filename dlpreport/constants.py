@@ -42,8 +42,7 @@ SEVERITY_RANK = {CRITICAL: 0, WARNING: 1, INFO: 2}
 QUICK_RANGES = [("Last 30 minutes", 30), ("Last 1 hour", 60), ("Last 2 hours", 120),
                 ("Last 4 hours", 240), ("Last 8 hours", 480), ("Last 12 hours", 720),
                 ("Last 24 hours", 1440)]
-ACCENT = "#005FB8"
 TREE_INDENT = 36
-GROUP_ROW_BG = "#E8EFF7"
+GROUP_ROW_BG = "#F1F4F8"
 SEVERITY_COLOR = {CRITICAL: "#B42318", WARNING: "#B54708", INFO: "#475467", "OK": "#1A7F37"}
 EXCEL_SHEET = "Sheet1"

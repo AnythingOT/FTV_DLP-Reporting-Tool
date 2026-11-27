@@ -15,6 +15,7 @@ from ..dlp_export import parse_dlp_export
 from ..influx import InfluxSource, friendly_error, profile_url
 from ..settings import DEFAULT_GENERAL, new_profile, settings_dir
 from ..timeutil import tz_choices
+from .theme import BG
 from .widgets import Tooltip
 
 log = logging.getLogger("dlpreport")
@@ -27,6 +28,7 @@ class SettingsDialog(tk.Toplevel):
     def __init__(self, master, settings, on_save):
         super().__init__(master)
         self.title("Settings")
+        self.configure(bg=BG)
         self.transient(master)
         self.resizable(False, False)
         self.on_save = on_save
@@ -43,7 +45,7 @@ class SettingsDialog(tk.Toplevel):
         nb.add(self._build_general(nb), text="General")
         bar = ttk.Frame(self)
         bar.pack(fill="x", padx=14, pady=(0, 14))
-        ttk.Label(bar, text=f"Saved in {settings_dir()}", foreground="grey").pack(side="left")
+        ttk.Label(bar, text=f"Saved in {settings_dir()}", style="Muted.TLabel").pack(side="left")
         ttk.Button(bar, text="Save", style="Accent.TButton", command=self.save).pack(side="right")
         ttk.Button(bar, text="Cancel", command=self.destroy).pack(side="right", padx=8)
         self.refresh_profiles(select=0)

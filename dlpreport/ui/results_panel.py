@@ -8,7 +8,8 @@ from tkinter import ttk
 from ..constants import CRITICAL, INFO, PREVIEW_ROWS, SEVERITY_COLOR, SEVERITY_RANK, WARNING
 from ..table import cell_text, iter_rows
 from ..timeutil import fmt_duration, fmt_ns
-from .theme import bold_font
+from .theme import STRIPE, bold_font
+from .widgets import Card
 
 
 def short_ns(ns, tz):
@@ -16,10 +17,10 @@ def short_ns(ns, tz):
     return fmt_ns(ns, tz)[:-5]
 
 
-class ResultsPanel(ttk.Frame):
+class ResultsPanel(Card):
     def __init__(self, master):
-        super().__init__(master)
-        self.nb = ttk.Notebook(self)
+        super().__init__(master, padding=(12, 10))
+        self.nb = ttk.Notebook(self.body, style="Card.TNotebook")
         self.nb.pack(fill="both", expand=True)
         self.prev_tv, self.prev_info = self._tab("Preview", "headings")
         self.health_tv, self.health_info = self._tab("Log health", "tree headings")
@@ -37,9 +38,9 @@ class ResultsPanel(ttk.Frame):
         self.clear("Select tags and click Fetch data.")
 
     def _tab(self, title, show):
-        frame = ttk.Frame(self.nb, padding=8)
+        frame = ttk.Frame(self.nb, style="Card.TFrame", padding=(0, 8, 0, 0))
         self.nb.add(frame, text=title)
-        body = ttk.Frame(frame)
+        body = ttk.Frame(frame, style="Card.TFrame")
         body.pack(fill="both", expand=True)
         body.rowconfigure(0, weight=1)
         body.columnconfigure(0, weight=1)
@@ -51,7 +52,9 @@ class ResultsPanel(ttk.Frame):
         ys.grid(row=0, column=1, sticky="ns")
         xs.grid(row=1, column=0, sticky="ew")
         info = tk.StringVar()
-        ttk.Label(frame, textvariable=info, foreground="grey", wraplength=900, justify="left").pack(anchor="w", pady=(6, 0))
+        tv.tag_configure("odd", background=STRIPE)
+        ttk.Label(frame, textvariable=info, style="CardMuted.TLabel", wraplength=900,
+                  justify="left").pack(anchor="w", pady=(6, 0))
         return tv, info
 
     def clear(self, message):
@@ -73,7 +76,8 @@ class ResultsPanel(ttk.Frame):
         for n, (ns, cells) in enumerate(iter_rows(collected, tags)):
             if n >= PREVIEW_ROWS:
                 break
-            tv.insert("", "end", values=[fmt_ns(ns, tz)] + [cell_text(c, include_status) for c in cells])
+            tv.insert("", "end", values=[fmt_ns(ns, tz)] + [cell_text(c, include_status) for c in cells],
+                      tags=("odd",) if n % 2 else ())
         total = collected.rows
         self.prev_info.set(f"{total:,} rows × {len(tags)} tags" +
                            (f"   (preview shows the first {PREVIEW_ROWS:,})" if total > PREVIEW_ROWS else "") +

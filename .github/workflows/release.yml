@@ -43,7 +43,7 @@ jobs:
         run: python -m unittest discover -s tests -v
 
       - name: Build exe
-        run: python -m PyInstaller --noconfirm --clean --onefile --windowed --name DLPReport --collect-data sv_ttk main.py
+        run: python -m PyInstaller --noconfirm --clean --onefile --windowed --name DLPReport main.py
 
       - name: Checksum
         working-directory: dist
