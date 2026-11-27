@@ -71,7 +71,8 @@ Publish a release (all on github.com):
    **Create new tag on publish**. Target: `main`.
 3. Click **Generate release notes**, then **Publish release**.
 4. Wait a few minutes. The `release` workflow (see the **Actions** tab) runs the tests, builds
-   `DLPReport.exe` and attaches it to the release, with a SHA-256 checksum.
+   `DLPReport.exe` and attaches it to the release, with a SHA-256 checksum and
+   `THIRD_PARTY_LICENSES.txt`.
 
 ## 3. Use
 
@@ -131,8 +132,11 @@ dlpreport/
 tests/             unit tests with real DataLogPro data from the test VM
 ```
 
-Licences: influxdb-client (MIT), openpyxl (MIT), reportlab (BSD), PyInstaller
-(GPL with bootloader exception – the built exe may be distributed freely).
+Licences: influxdb-client (MIT), openpyxl (MIT), reportlab (BSD), Python and tkinter (PSF),
+Tcl/Tk (BSD-style), PyInstaller (GPL with bootloader exception – the built exe may be distributed
+freely), plus their dependencies: see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Each
+release attaches `THIRD_PARTY_LICENSES.txt` with the full texts of everything bundled in the exe;
+share it with the exe.
 
 ## Licence
 
@@ -144,3 +148,6 @@ under the same licence. Versions up to commit `961a6c0` were released under the 
 stay MIT.
 
 Using it in your work? Credit is all that is asked: see `CITATION.cff`, or GitHub's *Cite this repository*.
+
+Not affiliated with or endorsed by Rockwell Automation or InfluxData. FactoryTalk is a trademark of
+Rockwell Automation, Inc.; InfluxDB is a trademark of InfluxData Inc.
