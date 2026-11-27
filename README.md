@@ -7,33 +7,11 @@ over the network) to **Excel, CSV and PDF**, with a tag-wise **log health check*
 digits of REALs), timestamps with nanoseconds. No averaging, interpolation or rounding.
 (Excel itself keeps at most 15 significant digits of a number; CSV and PDF are exact text.)
 
-<img width="1277" height="832" alt="image" src="https://github.com/user-attachments/assets/c0af553a-9e81-4b92-9309-3ec7a53314fe" />
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/ca11145c-e7e6-4bd5-9c71-3a44f6e732d6" />
 
-_
-|
-|
-_
+##
 
-<img width="1287" height="838" alt="image" src="https://github.com/user-attachments/assets/9f7c3fc6-9b38-4b7b-bc12-d482e380011b" />
-
-_
-|
-|
-_
-
-<img width="787" height="865" alt="image" src="https://github.com/user-attachments/assets/598bb154-8590-4a93-9623-4cda9aa200af" />
-
-_
-|
-|
-_
-
-<img width="790" height="752" alt="image" src="https://github.com/user-attachments/assets/21a88b0c-dd1a-452b-beef-737ec7321f7e" />
-
-_
-|
-|
-_
+<img width="933" height="816" alt="image" src="https://github.com/user-attachments/assets/ed0c021e-1f83-4f78-bad4-ca1d2dd94cde" />
 
 ## 1. Set up each HMI PC (once)
 
