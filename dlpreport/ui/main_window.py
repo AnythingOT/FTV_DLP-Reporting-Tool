@@ -22,8 +22,9 @@ from .period_panel import PeriodPanel
 from .results_panel import ResultsPanel
 from .settings_dialog import SettingsDialog
 from .tag_panel import TagPanel
-from .theme import apply_theme
-from .widgets import Tooltip
+from .theme import (ACCENT, BRAND, FOOTER, HEAD_BAD, HEAD_BUSY, HEAD_MUTED, HEAD_OK, MUTED, NAVY, NAVY_2,
+                    TEXT, apply_theme, font_family, make_icon)
+from .widgets import Card, Tooltip
 
 log = logging.getLogger("dlpreport")
 FORMATS = {"xlsx": "Excel", "csv": "CSV", "pdf": "PDF"}
@@ -39,7 +40,9 @@ class App:
         self.pending = {}
         self.generation = 0     # increases whenever the selection changes; stale fetch results are dropped
         apply_theme(root)
-        root.title(f"{APP_NAME} {VERSION}")
+        root.title(f"{APP_NAME} {VERSION} · {BRAND}")
+        self._icon = make_icon()      # keep a reference: Tk drops images nobody holds
+        root.iconphoto(True, self._icon)
         root.geometry("1280x800")
         root.minsize(1060, 660)
         self._build()
@@ -52,40 +55,25 @@ class App:
         r = self.root
         r.columnconfigure(0, weight=1)
         r.rowconfigure(2, weight=1)
-        head = ttk.Frame(r, padding=(18, 14, 18, 6))
-        head.grid(row=0, column=0, sticky="ew")
-        ttk.Label(head, text="DataLogPro Report", font=("Segoe UI Semibold", 17)).pack(side="left")
-        ttk.Button(head, text="⚙  Settings", command=self.open_settings).pack(side="right")
-        self.conn_var = tk.StringVar(value="● Not connected")
-        self.conn_lbl = ttk.Label(head, textvariable=self.conn_var, foreground="#B42318")
-        self.conn_lbl.pack(side="right", padx=(0, 16))
-        self.profile_var = tk.StringVar()
-        self.profile_cb = ttk.Combobox(head, textvariable=self.profile_var, state="readonly", width=24)
-        self.profile_cb.pack(side="right", padx=(0, 16))
-        self.profile_cb.bind("<<ComboboxSelected>>", lambda e: self.on_profile_change())
-        ttk.Label(head, text="HMI PC").pack(side="right", padx=(0, 8))
-        self.bucket_frame = ttk.Frame(head)
-        ttk.Label(self.bucket_frame, text="HMI server").pack(side="left", padx=(0, 8))
-        self.bucket_var = tk.StringVar()
-        self.bucket_cb = ttk.Combobox(self.bucket_frame, textvariable=self.bucket_var, state="readonly", width=18)
-        self.bucket_cb.pack(side="left")
-        self.bucket_cb.bind("<<ComboboxSelected>>", lambda e: self.on_bucket_change())
+        self._build_header()
 
         self.period = PeriodPanel(r, self.invalidate, lambda: profile_tz(self.profile),
                                   lambda: self.settings["general"]["max_days"])
-        self.period.grid(row=1, column=0, sticky="ew", padx=18, pady=(6, 4))
+        self.period.grid(row=1, column=0, sticky="ew", padx=16, pady=(14, 0))
 
         paned = ttk.PanedWindow(r, orient="horizontal")
-        paned.grid(row=2, column=0, sticky="nsew", padx=18, pady=6)
+        paned.grid(row=2, column=0, sticky="nsew", padx=16, pady=10)
         self.tags = TagPanel(paned, self.invalidate, self.load_tags)
         self.results = ResultsPanel(paned)
         paned.add(self.tags, weight=1)
         paned.add(self.results, weight=3)
 
-        act = ttk.Frame(r, padding=(18, 4, 18, 8))
-        act.grid(row=3, column=0, sticky="ew")
+        card = Card(r, padding=(14, 10))
+        card.grid(row=3, column=0, sticky="ew", padx=16, pady=(0, 12))
+        act = card.body
         self.good_var = tk.BooleanVar(value=True)
-        cb = ttk.Checkbutton(act, text="Good data only (status C)", variable=self.good_var, command=self.invalidate)
+        cb = ttk.Checkbutton(act, text="Good data only (status C)", variable=self.good_var,
+                             command=self.invalidate, style="Card.TCheckbutton")
         cb.pack(side="left")
         Tooltip(cb, "Only values with status C go into the data table. Excluded values are counted and "
                     "the log health check always uses all values.")
@@ -96,24 +84,69 @@ class App:
                         "(numbers limited to 15 significant digits)."}
         for kind in ("pdf", "csv", "xlsx"):
             b = ttk.Button(act, text=FORMATS[kind], command=lambda k=kind: self.download(k))
-            b.pack(side="right", padx=(8, 0))
+            b.pack(side="right", padx=(6, 0))
             Tooltip(b, tips[kind])
             self.buttons[kind] = b
-        ttk.Label(act, text="Download").pack(side="right")
+        ttk.Label(act, text="DOWNLOAD", style="Section.TLabel").pack(side="right", padx=(0, 4))
+        ttk.Separator(act, orient="vertical").pack(side="right", fill="y", padx=16)
         self.fetch_btn = ttk.Button(act, text="Fetch data", style="Accent.TButton", command=self.fetch)
-        self.fetch_btn.pack(side="right", padx=(0, 18))
-        self.progress = ttk.Progressbar(act, mode="indeterminate", length=120)
-        self.progress.pack(side="right", padx=(0, 16))
+        self.fetch_btn.pack(side="right")
+        self.progress = ttk.Progressbar(act, mode="indeterminate", length=140)
+        self.progress.pack(side="right", padx=(0, 14))
 
-        bar = ttk.Frame(r, padding=(18, 2, 18, 10))
-        bar.grid(row=4, column=0, sticky="ew")
-        self.msg_var = tk.StringVar(value="Starting…")
-        ttk.Label(bar, textvariable=self.msg_var, foreground="grey").pack(side="left")
-        ttk.Button(bar, text="Open folder", command=self.open_folder).pack(side="right")
-        self.open_btn = ttk.Button(bar, text="Open file", command=lambda: self._open(self.last_file))
-        self.open_btn.pack(side="right", padx=8)
-        self.open_btn.state(["disabled"])
+        self._build_footer()
         self._update_buttons()
+
+    def _build_header(self):
+        f = font_family()
+        bar = tk.Frame(self.root, bg=NAVY, height=64)
+        bar.grid(row=0, column=0, sticky="ew")
+        bar.pack_propagate(False)
+
+        mark = tk.Frame(bar, bg=NAVY)
+        mark.pack(side="left", padx=(18, 0))
+        tk.Label(mark, text="Anything", bg=NAVY, fg="white", font=(f, 17, "bold")).pack(side="left")
+        tk.Label(mark, text="OT", bg=NAVY, fg=ACCENT, font=(f, 17, "bold")).pack(side="left")
+        tk.Frame(bar, bg=NAVY_2, width=1).pack(side="left", fill="y", padx=16, pady=14)
+        title = tk.Frame(bar, bg=NAVY)
+        title.pack(side="left")
+        tk.Label(title, text=APP_NAME, bg=NAVY, fg="white", font=(f, 13, "bold")).pack(anchor="w")
+        tk.Label(title, text="DataLog Pro reports from InfluxDB", bg=NAVY,
+                 fg=HEAD_MUTED, font=(f, 9)).pack(anchor="w")
+
+        ttk.Button(bar, text="⚙  Settings", style="Header.TButton",
+                   command=self.open_settings).pack(side="right", padx=(0, 18))
+        self.conn_var = tk.StringVar(value="● Not connected")
+        self.conn_lbl = tk.Label(bar, textvariable=self.conn_var, bg=NAVY_2, fg=HEAD_BAD,
+                                 font=(f, 9, "bold"), padx=10, pady=4)
+        self.conn_lbl.pack(side="right", padx=(0, 16))
+        self.profile_var = tk.StringVar()
+        self.profile_cb = ttk.Combobox(bar, textvariable=self.profile_var, state="readonly", width=24)
+        self.profile_cb.pack(side="right", padx=(0, 16))
+        self.profile_cb.bind("<<ComboboxSelected>>", lambda e: self.on_profile_change())
+        tk.Label(bar, text="HMI PC", bg=NAVY, fg=HEAD_MUTED, font=(f, 9)).pack(side="right", padx=(0, 8))
+        self.bucket_frame = tk.Frame(bar, bg=NAVY)
+        tk.Label(self.bucket_frame, text="HMI server", bg=NAVY, fg=HEAD_MUTED,
+                 font=(f, 9)).pack(side="left", padx=(0, 8))
+        self.bucket_var = tk.StringVar()
+        self.bucket_cb = ttk.Combobox(self.bucket_frame, textvariable=self.bucket_var, state="readonly", width=18)
+        self.bucket_cb.pack(side="left")
+        self.bucket_cb.bind("<<ComboboxSelected>>", lambda e: self.on_bucket_change())
+
+    def _build_footer(self):
+        f = font_family()
+        bar = tk.Frame(self.root, bg=FOOTER, height=30)
+        bar.grid(row=4, column=0, sticky="ew")
+        bar.pack_propagate(False)
+        self.msg_var = tk.StringVar(value="Starting…")
+        tk.Label(bar, textvariable=self.msg_var, bg=FOOTER, fg=TEXT, font=(f, 9)).pack(side="left", padx=12)
+        tk.Label(bar, text=f"© {BRAND}  ·  {APP_NAME} v{VERSION}", bg=FOOTER, fg=MUTED,
+                 font=(f, 9)).pack(side="right", padx=12)
+        ttk.Button(bar, text="Open folder", style="Footer.TButton", command=self.open_folder).pack(side="right")
+        self.open_btn = ttk.Button(bar, text="Open file", style="Footer.TButton",
+                                   command=lambda: self._open(self.last_file))
+        self.open_btn.pack(side="right")
+        self.open_btn.state(["disabled"])
 
     # ------------------------------------------------------------------ state
     def general(self):
@@ -127,7 +160,8 @@ class App:
 
     def set_conn(self, text, ok):
         self.conn_var.set(f"● {text}")
-        self.conn_lbl.configure(foreground="#1A7F37" if ok else "#B42318")
+        busy = not ok and text.endswith("…")
+        self.conn_lbl.configure(fg=HEAD_OK if ok else (HEAD_BUSY if busy else HEAD_BAD))
 
     def invalidate(self):
         self.generation += 1

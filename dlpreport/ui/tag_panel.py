@@ -9,12 +9,12 @@ from tkinter import ttk
 from ..constants import GROUP_ROW_BG, NOT_IN_EXPORT, TYPE_LABEL, UNGROUPED
 from ..dlp_export import expected_interval_s, is_periodic, norm_tag
 from .theme import bold_font
-from .widgets import Tooltip
+from .widgets import Card, Tooltip
 
 
-class TagPanel(ttk.LabelFrame):
+class TagPanel(Card):
     def __init__(self, master, on_change, on_refresh):
-        super().__init__(master, text="Tags", padding=10)
+        super().__init__(master, title="Tags", padding=(12, 10))
         self.on_change, self.on_refresh = on_change, on_refresh
         self.profile = None
         self.tag_map = {}
@@ -23,14 +23,16 @@ class TagPanel(ttk.LabelFrame):
         self.item_tag, self.tag_items, self.group_children = {}, defaultdict(list), {}
         self._export_cache = (None, {})
 
-        top = ttk.Frame(self)
+        self.count_var = tk.StringVar()
+        ttk.Label(self.head, textvariable=self.count_var, style="CardMuted.TLabel").pack(side="right")
+        top = ttk.Frame(self.body, style="Card.TFrame")
         top.pack(fill="x")
         self.search_var = tk.StringVar()
         self.search_var.trace_add("write", lambda *a: self.refresh())
-        ttk.Label(top, text="Search").pack(side="left")
+        ttk.Label(top, text="Search", style="Card.TLabel").pack(side="left")
         ttk.Entry(top, textvariable=self.search_var).pack(side="left", fill="x", expand=True, padx=(8, 0))
 
-        body = ttk.Frame(self)
+        body = ttk.Frame(self.body, style="Card.TFrame")
         body.pack(fill="both", expand=True, pady=8)
         self.tv = ttk.Treeview(body, columns=("type", "logging"), show="tree headings", selectmode="none")
         self.tv.heading("#0", text="Group / tag", anchor="w")
@@ -46,7 +48,7 @@ class TagPanel(ttk.LabelFrame):
         sb.pack(side="left", fill="y")
         self.tv.bind("<Button-1>", self._click)
 
-        bottom = ttk.Frame(self)
+        bottom = ttk.Frame(self.body, style="Card.TFrame")
         bottom.pack(fill="x")
         b = ttk.Button(bottom, text="Select shown", command=self.select_shown)
         b.pack(side="left")
@@ -55,8 +57,6 @@ class TagPanel(ttk.LabelFrame):
         b = ttk.Button(bottom, text="↻ Refresh", command=self.on_refresh)
         b.pack(side="left")
         Tooltip(b, "Reload the tag list (tags logged in the last 30 days).")
-        self.count_var = tk.StringVar()
-        ttk.Label(bottom, textvariable=self.count_var, foreground="grey").pack(side="right")
 
     # ------------------------------------------------------------------ data
     def set_profile(self, profile):

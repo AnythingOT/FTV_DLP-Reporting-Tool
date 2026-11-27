@@ -131,7 +131,7 @@ dlpreport/
 tests/             unit tests with real DataLogPro data from the test VM
 ```
 
-Licences: influxdb-client (MIT), openpyxl (MIT), reportlab (BSD), sv-ttk (MIT), PyInstaller
+Licences: influxdb-client (MIT), openpyxl (MIT), reportlab (BSD), PyInstaller
 (GPL with bootloader exception – the built exe may be distributed freely).
 
 ## Licence

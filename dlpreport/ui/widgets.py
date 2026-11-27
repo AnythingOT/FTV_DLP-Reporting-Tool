@@ -1,4 +1,4 @@
-"""Small widgets: calendar popup, date-time picker, tooltip."""
+"""Small widgets: card panel, calendar popup, date-time picker, tooltip."""
 
 import calendar
 from datetime import date, datetime, timedelta
@@ -6,6 +6,23 @@ from datetime import date, datetime, timedelta
 import tkinter as tk
 from tkinter import ttk
 
+from .theme import BORDER, CARD, NAVY, bold_font, font_family
+
+
+class Card(tk.Frame):
+    """White panel with a 1px border and an optional small upper-case title.
+    Put children into .body; .head is the title row (right side free for extras)."""
+
+    def __init__(self, master, title=None, padding=(14, 10)):
+        super().__init__(master, bg=CARD, bd=0, highlightthickness=1,
+                         highlightbackground=BORDER, highlightcolor=BORDER)
+        self.body = ttk.Frame(self, style="Card.TFrame", padding=padding)
+        self.body.pack(fill="both", expand=True)
+        self.head = None
+        if title:
+            self.head = ttk.Frame(self.body, style="Card.TFrame")
+            self.head.pack(fill="x", pady=(0, 8))
+            ttk.Label(self.head, text=title.upper(), style="Section.TLabel").pack(side="left")
 
 
 class Tooltip:
@@ -33,8 +50,8 @@ class Tooltip:
         self.tip = tk.Toplevel(self.widget)
         self.tip.wm_overrideredirect(True)
         self.tip.geometry(f"+{x}+{y}")
-        tk.Label(self.tip, text=self.text, justify="left", background="#FFFFE6", relief="solid",
-                 borderwidth=1, wraplength=360, padx=6, pady=4).pack()
+        tk.Label(self.tip, text=self.text, justify="left", background=NAVY, foreground="white",
+                 font=(font_family(), 9), borderwidth=0, wraplength=360, padx=10, pady=6).pack()
 
     def _hide(self, _e=None):
         self._cancel()
@@ -47,22 +64,23 @@ class CalendarPopup(tk.Toplevel):
     def __init__(self, anchor, current, on_pick):
         super().__init__(anchor)
         self.withdraw()
+        self.configure(bg=CARD)
         self.title("Select date")
         self.transient(anchor.winfo_toplevel())
         self.resizable(False, False)
         self.on_pick = on_pick
         self.sel = current
         self.year, self.month = current.year, current.month
-        frame = ttk.Frame(self, padding=10)
+        frame = ttk.Frame(self, style="Card.TFrame", padding=12)
         frame.pack(fill="both", expand=True)
-        nav = ttk.Frame(frame)
+        nav = ttk.Frame(frame, style="Card.TFrame")
         nav.pack(fill="x")
-        ttk.Button(nav, text="‹", width=3, command=lambda: self.shift(-1)).pack(side="left")
+        ttk.Button(nav, text="‹", width=3, style="Day.TButton", command=lambda: self.shift(-1)).pack(side="left")
         self.title_var = tk.StringVar()
-        ttk.Label(nav, textvariable=self.title_var, anchor="center",
-                  font=("Segoe UI Semibold", 10)).pack(side="left", expand=True, fill="x")
-        ttk.Button(nav, text="›", width=3, command=lambda: self.shift(1)).pack(side="right")
-        self.days = ttk.Frame(frame)
+        ttk.Label(nav, textvariable=self.title_var, anchor="center", style="Card.TLabel",
+                  font=bold_font()).pack(side="left", expand=True, fill="x")
+        ttk.Button(nav, text="›", width=3, style="Day.TButton", command=lambda: self.shift(1)).pack(side="right")
+        self.days = ttk.Frame(frame, style="Card.TFrame")
         self.days.pack(pady=(8, 0))
         ttk.Button(frame, text="Today", command=lambda: self.pick(date.today())).pack(fill="x", pady=(8, 0))
         self.bind("<Escape>", lambda e: self.destroy())
@@ -83,15 +101,16 @@ class CalendarPopup(tk.Toplevel):
             w.destroy()
         self.title_var.set(f"{calendar.month_name[self.month]} {self.year}")
         for i, name in enumerate(("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su")):
-            ttk.Label(self.days, text=name, width=4, anchor="center").grid(row=0, column=i)
+            ttk.Label(self.days, text=name, width=4, anchor="center", style="CardMuted.TLabel").grid(
+                row=0, column=i, pady=(0, 4))
         today = date.today()
         weeks = calendar.Calendar(firstweekday=0).monthdatescalendar(self.year, self.month)
         for r, week in enumerate(weeks, start=1):
             for c, d in enumerate(week):
                 if d.month != self.month:
-                    ttk.Label(self.days, text="", width=4).grid(row=r, column=c)
+                    ttk.Label(self.days, text="", width=4, style="Card.TLabel").grid(row=r, column=c)
                     continue
-                style = "Accent.TButton" if d == self.sel else "TButton"
+                style = "DaySel.TButton" if d == self.sel else "Day.TButton"
                 b = ttk.Button(self.days, text=str(d.day), width=3, style=style,
                                command=lambda d=d: self.pick(d))
                 if d > today + timedelta(days=1):     # tomorrow stays selectable: the plant may be a day ahead
@@ -111,7 +130,7 @@ class DateTimePicker(ttk.Frame):
     obligations on every distributed exe."""
 
     def __init__(self, master, on_change):
-        super().__init__(master)
+        super().__init__(master, style="Card.TFrame")
         self.on_change = on_change
         self.day = date.today()
         self._last = None      # last value reported, so on_change fires only on a real change
@@ -131,7 +150,7 @@ class DateTimePicker(ttk.Frame):
             sp.bind("<Up>", lambda e, w=sp: self._step(w, 1))
             sp.bind("<Down>", lambda e, w=sp: self._step(w, -1))
             if var is self.hour:
-                ttk.Label(self, text=":").pack(side="left", padx=3)
+                ttk.Label(self, text=":", style="Card.TLabel").pack(side="left", padx=3)
 
     def _step(self, widget, delta):
         widget.event_generate("<<Increment>>" if delta > 0 else "<<Decrement>>")

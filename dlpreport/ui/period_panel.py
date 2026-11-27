@@ -7,28 +7,30 @@ from tkinter import ttk
 
 from ..constants import QUICK_RANGES
 from ..timeutil import naive_to_aware, now_in
-from .widgets import DateTimePicker
+from .widgets import Card, DateTimePicker
 
 
-class PeriodPanel(ttk.LabelFrame):
+class PeriodPanel(Card):
     def __init__(self, master, on_change, get_tz, get_max_days):
-        super().__init__(master, text="Period", padding=(14, 10))
+        super().__init__(master, title="Period")
         self.on_change, self.get_tz, self.get_max_days = on_change, get_tz, get_max_days
-        ttk.Button(self, text="Today", command=lambda: self.set_quick("today")).pack(side="left")
-        ttk.Button(self, text="Yesterday", command=lambda: self.set_quick("yesterday")).pack(side="left", padx=8)
+        self.note = ttk.Label(self.head, style="CardMuted.TLabel")
+        self.note.pack(side="right")
+        row = ttk.Frame(self.body, style="Card.TFrame")
+        row.pack(fill="x")
+        ttk.Button(row, text="Today", command=lambda: self.set_quick("today")).pack(side="left")
+        ttk.Button(row, text="Yesterday", command=lambda: self.set_quick("yesterday")).pack(side="left", padx=8)
         self.last_var = tk.StringVar(value="Last…")
-        self.last_cb = ttk.Combobox(self, textvariable=self.last_var, state="readonly", width=16)
+        self.last_cb = ttk.Combobox(row, textvariable=self.last_var, state="readonly", width=16)
         self.last_cb.pack(side="left")
         self.last_cb.bind("<<ComboboxSelected>>", lambda e: self._last_selected())
-        ttk.Separator(self, orient="vertical").pack(side="left", fill="y", padx=18)
-        ttk.Label(self, text="From").pack(side="left", padx=(0, 8))
-        self.from_p = DateTimePicker(self, self.on_change)
+        ttk.Separator(row, orient="vertical").pack(side="left", fill="y", padx=18)
+        ttk.Label(row, text="From", style="Card.TLabel").pack(side="left", padx=(0, 8))
+        self.from_p = DateTimePicker(row, self.on_change)
         self.from_p.pack(side="left")
-        ttk.Label(self, text="To").pack(side="left", padx=(20, 8))
-        self.to_p = DateTimePicker(self, self.on_change)
+        ttk.Label(row, text="To", style="Card.TLabel").pack(side="left", padx=(20, 8))
+        self.to_p = DateTimePicker(row, self.on_change)
         self.to_p.pack(side="left")
-        self.note = ttk.Label(self, foreground="grey")
-        self.note.pack(side="right")
         self.update_limits()
 
     def update_limits(self):
