@@ -65,6 +65,11 @@ py main.py
 
 Build a single exe (runs the unit tests first): `build.bat` → `dist\DLPReport.exe`
 
+Publish a release: set `VERSION` in `dlpreport/app_info.py`, commit, then push a matching tag
+(`git tag v1.0.2 && git push origin v1.0.2`). The `release` workflow runs the tests, builds
+`DLPReport.exe` on Windows and attaches it (with a SHA-256 checksum) to a GitHub release.
+Tags with a hyphen, such as `v1.1.0-rc1`, become pre-releases.
+
 ## 3. Use
 
 1. **⚙ Settings → HMI PCs → Add**: machine name, IP, member username/password or read-only token,
