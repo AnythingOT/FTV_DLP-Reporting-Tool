@@ -65,10 +65,13 @@ py main.py
 
 Build a single exe (runs the unit tests first): `build.bat` → `dist\DLPReport.exe`
 
-Publish a release: set `VERSION` in `dlpreport/app_info.py`, commit, then push a matching tag
-(`git tag v1.0.2 && git push origin v1.0.2`). The `release` workflow runs the tests, builds
-`DLPReport.exe` on Windows and attaches it (with a SHA-256 checksum) to a GitHub release.
-Tags with a hyphen, such as `v1.1.0-rc1`, become pre-releases.
+Publish a release (all on github.com):
+1. Edit `dlpreport/app_info.py` (pencil icon), set `VERSION`, e.g. `"1.0.2"`, and commit to `main`.
+2. Go to **Releases → Draft a new release**. Under **Choose a tag**, type `v1.0.2` and pick
+   **Create new tag on publish**. Target: `main`.
+3. Click **Generate release notes**, then **Publish release**.
+4. Wait a few minutes. The `release` workflow (see the **Actions** tab) runs the tests, builds
+   `DLPReport.exe` and attaches it to the release, with a SHA-256 checksum.
 
 ## 3. Use
 
