@@ -1,7 +1,8 @@
 name: release
 # Publish a release on GitHub (Releases -> Draft a new release) with a tag like
 # v1.0.2 that matches VERSION in dlpreport/app_info.py. This workflow then builds
-# DLPReport.exe and attaches it, with a SHA-256 checksum, to that release.
+# DLPReport.exe and attaches it, with a SHA-256 checksum and THIRD_PARTY_LICENSES.txt,
+# to that release.
 on:
   release:
     types: [published]
@@ -45,6 +46,10 @@ jobs:
       - name: Build exe
         run: python -m PyInstaller --noconfirm --clean --onefile --windowed --name DLPReport main.py
 
+      - name: Write third-party licences
+        # Full licence texts of Python, Tcl/Tk and every package bundled in the exe.
+        run: python tools/collect_licenses.py -r requirements.txt --tkinter --app DLPReport -o dist/THIRD_PARTY_LICENSES.txt
+
       - name: Checksum
         working-directory: dist
         run: |
@@ -55,4 +60,4 @@ jobs:
       - name: Attach exe to the release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload $env:GITHUB_REF_NAME dist/DLPReport.exe dist/DLPReport.exe.sha256 --clobber
+        run: gh release upload $env:GITHUB_REF_NAME dist/DLPReport.exe dist/DLPReport.exe.sha256 dist/THIRD_PARTY_LICENSES.txt --clobber
